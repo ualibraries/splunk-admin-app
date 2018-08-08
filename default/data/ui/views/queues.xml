@@ -1,0 +1,75 @@
+<form>
+  <label>Queue Health</label>
+
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time_tok" searchWhenChanged="true">
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+
+  <search id="base">
+    <query>
+      index=_internal group=queue
+      | eval percfull=round(((current_size_kb/max_size_kb)*100),2)
+      | dedup host,name
+      | sort -percfull
+    </query>
+    <earliest>$time_tok.earliest$</earliest>
+    <latest>$time_tok.latest$</latest>
+    <refresh>120</refresh>
+    <done>
+      <set token="search_done">true</set>
+    </done>
+  </search>
+
+  <search id="full" base="base">
+    <query>
+      | where percfull&gt;80
+    </query>
+    <progress>
+      <condition match="$job.resultCount$&gt;0">
+        <set token="show_full">true</set>
+      </condition>
+      <condition>
+        <unset token="show_full"></unset>
+      </condition>
+    </progress>
+  </search>
+
+  <row>
+    <panel>
+      <title>Health Results</title>
+
+      <chart>
+        <search base="base">
+          <query>| timechart values(percfull) by host useother=f usenull=f</query>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">pct full (log)</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.layout.splitSeries">0</option>
+      </chart>
+
+      <table depends="$search_done$,$show_full$">
+        <search base="full">
+          <query>| table _time host name current_size_kb max_size_kb percfull</query>
+        </search>
+      </table>
+
+      <table depends="$search_done$" rejects="$show_full$">
+        <search base="base">
+          <query>| head 10
+          | table _time host name current_size_kb max_size_kb percfull</query>
+        </search>
+      </table>
+
+    </panel>
+  </row>
+</form>

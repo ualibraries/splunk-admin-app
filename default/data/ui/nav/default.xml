@@ -1,0 +1,9 @@
+<nav search_view="search" color="#990033">
+	<view name="search" default='true' />
+	<view name="mainDashboard" />
+	<view name="license_usage" />
+	<view name="splunk_logins" />
+	<view name="queues"/>
+	<view name="forwarders_dash" />
+	<view name="scheduled_searches" />
+</nav>

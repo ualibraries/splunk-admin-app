@@ -1,0 +1,55 @@
+<dashboard>
+  <label>Forwarders</label>
+  <fieldset submitButton="true">
+    <input type="text" token="search_string">
+      <label>Server Search</label>
+      <default></default>
+    </input>
+  </fieldset>
+   <row>
+     <panel>
+       <table>
+         <title>Server Directory</title>
+           <search>
+             <query>_internal" source="*metrics.lo*" group=tcpin_connections NOT eventType=*
+               | eval sourceHost=if(isnull(hostname), sourceHost,hostname) | search sourceHost="$search_string$*"
+             </query>
+           </search>
+        </table>
+      </panel>
+   </row>
+   <row>
+     <panel>
+       <table>
+         <title>Best Performing Servers</title>
+           <search>
+             <query>index="_internal" source="*metrics.lo*" group=tcpin_connections NOT eventType=*
+               | eval sourceHost=if(isnull(hostname), sourceHost,hostname) | search sourceHost=***
+               | timechart per_second(kb) by sourceHost WHERE max in top5 useother=f
+             </query>
+           </search>
+       </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Forwarder Data</title>
+          <search>
+            <query>index="_internal" source="*metrics.lo*" group=tcpin_connections
+              | dedup guid
+              | eval sourceHost=if(isnull(hostname), sourceHost,hostname)
+              | eval connectionType=case(fwdType=="uf","universal forwarder", fwdType=="lwf",
+              "lightweight forwarder",fwdType=="full", "heavy forwarder", connectionType=="cooked" or connectionType=="cookedSSL",
+              "Splunk forwarder", connectionType=="raw" or connectionType=="rawSSL","legacy forwarder")
+              | eval build=if(isnull(build),"n/a",build)
+              | eval version=if(isnull(version),"pre 4.2",version)
+              | eval guid=if(isnull(guid),sourceHost,guid)
+              | eval os=if(isnull(os),"n/a",os)| eval arch=if(isnull(arch),"n/a",arch)
+              | table sourceHost connectionType sourceIp sourceHost ssl ack build version os arch guid
+            </query>
+          </search>
+       </table>
+     </panel>
+   </row>
+ </dashboard>

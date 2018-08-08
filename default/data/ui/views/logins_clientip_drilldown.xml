@@ -1,0 +1,46 @@
+<form>
+  <label>Logins by User</label>
+  <fieldset submitButton="true" autoRun="true">
+    <input type="text" token="from" searchWhenChanged="false">
+      <label>Client IP</label>
+    </input>
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Time Range</label>
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>| rest services/authentication/users splunk_server=local
+            | rename title as user
+            | join user
+              [ search index=_audit "login attempt" info="failed"
+              | JOIN type=left date_year date_month date_mday date_hour date_minute date_second
+                [ search index=_internal "POST /en-US/account/login HTTP/1.1"
+                fields date_year date_month date_mday date_hour date_minute date_second clientip]
+              | eval newfield = if(isnull(clientip), 1, 0)
+              | search newfield=0
+              | lookup dnsLookup IP as clientip
+              | eval pretty=if(isnull(FQDN),clientip,FQDN . " (" . clientip . ")")
+              | eval Time=_time
+              | convert timeformat="%F %T" ctime(Time)
+              | eventstats count as Attempts by user ]
+            | search clientip=$form.from$
+            | rename pretty as From
+            | dedup user
+            | sort -Time
+            | eval tempUser=user." (".realname.")"
+            | rename tempUser as "ASURITE(Real Name)"
+            | table Time "ASURITE(Real Name)" roles From Attempts</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+</form>

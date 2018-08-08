@@ -1,0 +1,34 @@
+<form>
+  <label>Logins by User</label>
+  <fieldset submitButton="true" autoRun="true">
+    <input type="text" token="host" searchWhenChanged="false">
+      <label>Splunk Server</label>
+    </input>
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Time Range</label>
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>| rest services/authentication/users splunk_server=local
+            | rename title as user
+            | join user
+              [ search index=_audit "login attempt" user!=dsoc_app info=succeeded
+              | stats max(timestamp) as last_login by user, host]
+            | search host=$form.host$
+            | eval id_and_name=user." (".realname.")"
+            | rename id_and_name as "ASURITE(Full Name)"
+            | fields last_login "ASURITE(Full Name)" host roles</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+</form>

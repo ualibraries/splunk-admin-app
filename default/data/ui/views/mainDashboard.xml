@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dashboard>
+  <label>Admin Dashboard</label>
+  <row>
+    <panel>
+      <chart>
+        <title>Splunk License Usage Last 7 Days vs Previous Week</title>
+        <search>
+          <query>index=_internal source=*license_usage.log type=RolloverSummary earliest=-13d latest=now
+            | eval GB = round(b/1024/1024/1024, 2)
+            | eval _time=_time-43200
+            | timechart span=1d sum(GB) AS "Total GB used"
+            | timewrap w
+            | rename "Total GB used_latest_week" as "latest week" "Total GB used_1week_before" as "previous week"</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.text">Days</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">GB</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.primaryAxisTitle.text"></option>
+        <option name="charting.secondaryAxisTitle.text"></option>
+        <option name="count">50</option>
+        <option name="displayRowNumbers">true</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>License Usage Last 7 Days vs Previous Year</title>
+        <search>
+          <query>index=_internal source=*license_usage.log type=RolloverSummary earliest=-7d latest=now
+            | append [search index=_internal source=*license_usage.log type=RolloverSummary earliest=-372d latest=-365d]
+            | eval _time=_time-43200
+            | eval GB = round(b/1024/1024/1024, 2)
+            | timechart span=1d sum(GB) AS "Total GB used"
+            | timewrap y
+            | rename "Total GB used_latest_year" as "latest week" "Total GB used_1year_before" as "previous year"</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>License Usage by Host Yesterday</title>
+        <search>
+          <query>index=_internal source=*license_usage* h=* b=*
+            | chart sum(b) as bytes by h,st
+            | untable h,st,bytes
+            | eval GB=round(bytes/1024/1024/1024,2)
+            | xyseries h,st,GB
+            | addtotals fieldname=total
+            | sort - total
+            | rename h as host
+            | head 10</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">GB</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">total</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>License Usage by Sourcetype Yesterday</title>
+        <search>
+          <query>index=_internal source=*license_usage*  h=* b=*
+            |  chart sum(b) AS bytes by st
+            | eval GB=round(bytes/1024/1024/1024,2)
+            | rename st AS sourcetype
+            | fields - bytes
+            | sort -GB
+            | head 15</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>PA Usage</title>
+      <single>
+        <search>
+          <query>| savedsearch "License usage over 1w - PA"
+            | `daysago`
+            | eval GB=round(bytes/1024/1024/1024,2)
+            | fields - bytes
+            | where _time&gt;relative_time(now(), "-7d")
+            | timechart cont=false sum(GB)</query>
+          <earliest>-7d@m</earliest>
+          <latest>now</latest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">percent</option>
+        <option name="trendInterval">-24h</option>
+        <option name="underLabel">in last 24 hours</option>
+        <option name="unit">GB</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>F5 Usage</title>
+      <single>
+        <search>
+          <query>| savedsearch "License usage over 1w - F5"
+            | `daysago`
+            | eval GB=round(bytes/1024/1024/1024,2)
+            | fields - bytes
+            | where _time&gt;relative_time(now(), "-7d")
+            | timechart cont=false sum(GB)</query>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">percent</option>
+        <option name="trendInterval">-24h</option>
+        <option name="underLabel">in last 24 hours</option>
+        <option name="unit">GB</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Web Logs Usage</title>
+      <single>
+        <search>
+          <query>| savedsearch "License usage over 1w - Web"
+            | `daysago`
+            | eval GB=round(bytes/1024/1024/1024,2)
+            | fields - bytes
+            | where _time&gt;relative_time(now(), "-7d")
+            | timechart cont=false sum(GB)</query>
+          <earliest>-7d@m</earliest>
+          <latest>now</latest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">percent</option>
+        <option name="trendInterval">-24h</option>
+        <option name="underLabel">in last 24 hours</option>
+        <option name="unit">GB</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Exchange Usage</title>
+      <single>
+        <search>
+          <query>| savedsearch "License usage over 1w - Exchange"
+            | `daysago`
+            | eval GB=round(bytes/1024/1024/1024,2)
+            | fields - bytes
+            | where _time&gt;relative_time(now(), "-7d")
+            | timechart cont=false sum(GB)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">percent</option>
+        <option name="trendInterval">-24h</option>
+        <option name="underLabel">in last 24 hours</option>
+        <option name="unit">GB</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Windows Security Usage</title>
+      <single>
+        <search>
+          <query>index=_internal source=*license_usage*  h=* b=* st=WinEventLog:Security earliest=-7d@h
+            | `daysago`
+            | timechart sum(b) as bytes
+            | eval GB=round(bytes/1024/1024/1024,2)
+            | fields - bytes
+            | where _time&gt;relative_time(now(), "-7d")
+            | timechart cont=false sum(GB)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">percent</option>
+        <option name="trendInterval">-24h</option>
+        <option name="underLabel">in last 24 hours</option>
+        <option name="unit">GB</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Barracuda Usage</title>
+      <single>
+        <search>
+          <query>index=_internal source=*license_usage*  h=* b=* st=barracuda earliest=-7d@h
+            | `daysago`
+            | timechart sum(b) as bytes
+            | eval MB=round(bytes/1024/1024,2)
+            | fields - bytes
+            | where _time&gt;relative_time(now(), "-7d")
+            | timechart cont=false sum(MB)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">percent</option>
+        <option name="trendInterval">-24h</option>
+        <option name="underLabel">in last 24 hours</option>
+        <option name="unit">MB</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Cedar Crestone Usage</title>
+      <single>
+        <search>
+          <query>index=_internal source=*license_usage*  h=* b=* st=asu_*
+            | `daysago`
+            | chart sum(b) as bytes by _time
+            | eval MB=round(bytes/1024/1024,2)
+            | fields - bytes
+            | where _time&gt;relative_time(now(), "-7d")
+            | timechart partial=t cont=f sum(MB)</query>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">percent</option>
+        <option name="trendInterval">-24h</option>
+        <option name="underLabel">in last 24 hours</option>
+        <option name="unit">MB</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Splunk logins in the last 12 hours</title>
+        <search ref="Splunk logins in the last 12 hours"></search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="rowNumbers">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="info">
+          <colorPalette type="map">{"failed":#D93F3C}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Failed Splunk Logins last 7 days</title>
+        <search>
+          <query>index=_audit "login attempt" info="failed"
+            | JOIN type=left date_year date_month date_mday date_hour date_minute date_second
+              [ search index=_internal "POST /en-US/account/login HTTP/1.1"
+                | fields date_year date_month date_mday date_hour date_minute date_second clientip]
+            | eval newfield=if(isnull(clientip), 1, 0)
+            | search newfield=0
+            | lookup dnsLookup IP as clientip
+            | eval pretty=if(isnull(FQDN),clientip,FQDN . " (" . clientip . ")")
+            | eval Time=_time
+            | convert timeformat="%F %T" ctime(Time)
+            | rename user as User pretty as From
+            | eventstats count as Attempts by User
+            | dedup User
+            | table Time User From Attempts</query>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="count">50</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="rowNumbers">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="Attempts">
+          <colorPalette type="list">[#FFFFFF,#F7BC38,#ED8440,#D93F3C]</colorPalette>
+          <scale type="threshold">4,7,10</scale>
+        </format>
+      </table>
+    </panel>
+  </row>
+</dashboard>
