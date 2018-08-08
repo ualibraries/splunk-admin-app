@@ -207,39 +207,6 @@
       </single>
     </panel>
     <panel>
-      <title>F5 Usage</title>
-      <single>
-        <search>
-          <query>| savedsearch "License usage over 1w - F5"
-            | `daysago`
-            | eval GB=round(bytes/1024/1024/1024,2)
-            | fields - bytes
-            | where _time&gt;relative_time(now(), "-7d")
-            | timechart cont=false sum(GB)</query>
-          <earliest>-7d@h</earliest>
-          <latest>now</latest>
-          <refresh>10m</refresh>
-          <refreshType>delay</refreshType>
-        </search>
-        <option name="colorBy">value</option>
-        <option name="colorMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="linkView">search</option>
-        <option name="numberPrecision">0</option>
-        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
-        <option name="rangeValues">[0,30,70,100]</option>
-        <option name="showSparkline">1</option>
-        <option name="showTrendIndicator">1</option>
-        <option name="trendColorInterpretation">standard</option>
-        <option name="trendDisplayMode">percent</option>
-        <option name="trendInterval">-24h</option>
-        <option name="underLabel">in last 24 hours</option>
-        <option name="unit">GB</option>
-        <option name="useColors">0</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-    </panel>
-    <panel>
       <title>Web Logs Usage</title>
       <single>
         <search>
@@ -250,39 +217,6 @@
             | where _time&gt;relative_time(now(), "-7d")
             | timechart cont=false sum(GB)</query>
           <earliest>-7d@m</earliest>
-          <latest>now</latest>
-          <refresh>10m</refresh>
-          <refreshType>delay</refreshType>
-        </search>
-        <option name="colorBy">value</option>
-        <option name="colorMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="linkView">search</option>
-        <option name="numberPrecision">0</option>
-        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
-        <option name="rangeValues">[0,30,70,100]</option>
-        <option name="showSparkline">1</option>
-        <option name="showTrendIndicator">1</option>
-        <option name="trendColorInterpretation">standard</option>
-        <option name="trendDisplayMode">percent</option>
-        <option name="trendInterval">-24h</option>
-        <option name="underLabel">in last 24 hours</option>
-        <option name="unit">GB</option>
-        <option name="useColors">0</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-    </panel>
-    <panel>
-      <title>Exchange Usage</title>
-      <single>
-        <search>
-          <query>| savedsearch "License usage over 1w - Exchange"
-            | `daysago`
-            | eval GB=round(bytes/1024/1024/1024,2)
-            | fields - bytes
-            | where _time&gt;relative_time(now(), "-7d")
-            | timechart cont=false sum(GB)</query>
-          <earliest>-24h@h</earliest>
           <latest>now</latest>
           <refresh>10m</refresh>
           <refreshType>delay</refreshType>
@@ -335,74 +269,6 @@
         <option name="trendInterval">-24h</option>
         <option name="underLabel">in last 24 hours</option>
         <option name="unit">GB</option>
-        <option name="useColors">0</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-    </panel>
-    <panel>
-      <title>Barracuda Usage</title>
-      <single>
-        <search>
-          <query>index=_internal source=*license_usage*  h=* b=* st=barracuda earliest=-7d@h
-            | `daysago`
-            | timechart sum(b) as bytes
-            | eval MB=round(bytes/1024/1024,2)
-            | fields - bytes
-            | where _time&gt;relative_time(now(), "-7d")
-            | timechart cont=false sum(MB)</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-          <refresh>10m</refresh>
-          <refreshType>delay</refreshType>
-        </search>
-        <option name="colorBy">value</option>
-        <option name="colorMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="linkView">search</option>
-        <option name="numberPrecision">0</option>
-        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
-        <option name="rangeValues">[0,30,70,100]</option>
-        <option name="showSparkline">1</option>
-        <option name="showTrendIndicator">1</option>
-        <option name="trendColorInterpretation">standard</option>
-        <option name="trendDisplayMode">percent</option>
-        <option name="trendInterval">-24h</option>
-        <option name="underLabel">in last 24 hours</option>
-        <option name="unit">MB</option>
-        <option name="useColors">0</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-    </panel>
-    <panel>
-      <title>Cedar Crestone Usage</title>
-      <single>
-        <search>
-          <query>index=_internal source=*license_usage*  h=* b=* st=asu_*
-            | `daysago`
-            | chart sum(b) as bytes by _time
-            | eval MB=round(bytes/1024/1024,2)
-            | fields - bytes
-            | where _time&gt;relative_time(now(), "-7d")
-            | timechart partial=t cont=f sum(MB)</query>
-          <earliest>-7d@h</earliest>
-          <latest>now</latest>
-          <refresh>10m</refresh>
-          <refreshType>delay</refreshType>
-        </search>
-        <option name="colorBy">value</option>
-        <option name="colorMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="linkView">search</option>
-        <option name="numberPrecision">0</option>
-        <option name="rangeColors">["0x65a637","0x6db7c6","0xf7bc38","0xf58f39","0xd93f3c"]</option>
-        <option name="rangeValues">[0,30,70,100]</option>
-        <option name="showSparkline">1</option>
-        <option name="showTrendIndicator">1</option>
-        <option name="trendColorInterpretation">standard</option>
-        <option name="trendDisplayMode">percent</option>
-        <option name="trendInterval">-24h</option>
-        <option name="underLabel">in last 24 hours</option>
-        <option name="unit">MB</option>
         <option name="useColors">0</option>
         <option name="useThousandSeparators">1</option>
       </single>
