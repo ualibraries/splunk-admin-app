@@ -1,4 +1,4 @@
-<nav search_view="search" color="#003366">
+<nav search_view="search" color="#CC0033">
 	<view name="search" default='true' />
 	<view name="mainDashboard" />
 	<view name="license_usage" />
