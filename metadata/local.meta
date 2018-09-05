@@ -17,3 +17,25 @@ modtime = 1505950980.903450000
 [views/splunk_logins]
 version = 6.6.1
 modtime = 1510690769.219458000
+
+[app/install/install_source_checksum]
+version = 7.0.2
+modtime = 1533839589.874612000
+
+[props/ezproxy.log-2/EXTRACT-netid]
+access = read : [ admin ], write : [ admin ]
+export = system
+owner = inolan
+version = 7.0.2
+modtime = 1536101940.892754000
+
+[props/ezproxy.log-2/EXTRACT-clientip]
+access = read : [ admin ], write : [ admin ]
+export = system
+owner = inolan
+version = 7.0.2
+modtime = 1536101959.656668000
+
+[views/mainDashboard]
+version = 7.0.2
+modtime = 1536169670.534466000
