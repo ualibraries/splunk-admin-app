@@ -245,7 +245,18 @@
     <panel>
       <table>
         <title>Splunk logins in the last 12 hours</title>
-        <search ref="Splunk logins in the last 12 hours"></search>
+        <search
+          <query>| rest services/authentication/users splunk_server=local
+            | rename title as user
+            | join user
+              [ search index=_audit "login attempt" user!=dsoc_app info=succeeded
+                | eval Time=_time
+                | convert timeformat="%F %T" ctime(Time)]
+            | eval id_and_name=user." (".realname.")"
+            | rename id_and_name as "username(Full Name)"
+            | sort -Time
+            | fields Time, "username(Full Name)", host, roles, info, user</query>
+        </search>
         <option name="count">20</option>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">cell</option>
@@ -253,42 +264,6 @@
         <option name="wrap">true</option>
         <format type="color" field="info">
           <colorPalette type="map">{"failed":#D93F3C}</colorPalette>
-        </format>
-      </table>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <table>
-        <title>Failed Splunk Logins last 7 days</title>
-        <search>
-          <query>index=_audit "login attempt" info="failed"
-            | JOIN type=left date_year date_month date_mday date_hour date_minute date_second
-              [ search index=_internal "POST /en-US/account/login HTTP/1.1"
-                | fields date_year date_month date_mday date_hour date_minute date_second clientip]
-            | eval newfield=if(isnull(clientip), 1, 0)
-            | search newfield=0
-            | lookup dnsLookup IP as clientip
-            | eval pretty=if(isnull(FQDN),clientip,FQDN . " (" . clientip . ")")
-            | eval Time=_time
-            | convert timeformat="%F %T" ctime(Time)
-            | rename user as User pretty as From
-            | eventstats count as Attempts by User
-            | dedup User
-            | table Time User From Attempts</query>
-          <earliest>-7d@h</earliest>
-          <latest>now</latest>
-          <refresh>10m</refresh>
-          <refreshType>delay</refreshType>
-        </search>
-        <option name="count">50</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="rowNumbers">false</option>
-        <option name="wrap">true</option>
-        <format type="color" field="Attempts">
-          <colorPalette type="list">[#FFFFFF,#F7BC38,#ED8440,#D93F3C]</colorPalette>
-          <scale type="threshold">4,7,10</scale>
         </format>
       </table>
     </panel>
